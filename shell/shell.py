@@ -13,7 +13,7 @@ def changeDirect(currdir):#method to change directories
         pass         
 
 
-def forkExec(rc, piping, r, w,left):   #method to execute fork
+def forkExec(rc, piping, r, w,left, background):   #method to execute fork
     if rc < 0:
         os.write(2, ("fork failed, returning %d\n" % rc).encode())
         sys.exit(1)
@@ -47,7 +47,7 @@ def forkExec(rc, piping, r, w,left):   #method to execute fork
         else:                                           #no redirection
             args = inputdirection[0].split()
         if len(args) < 1:
-            sys.exit(1)
+            sys.exit(0)
 
         for dir in re.split(":", os.environ['PATH']):  # try each directory in path
             program = "%s/%s" % (dir, args[0])
@@ -64,7 +64,8 @@ def forkExec(rc, piping, r, w,left):   #method to execute fork
     else:                           # parent fork 
         if(piping):
             os.dup2(1,w,True)
-        childPidCode = os.wait()
+        if(not background):#determines whether to run in background or not
+            childPidCode = os.wait()
 
     pid = os.getpid()               # get and remember pid
     currdir = os.getcwd()
@@ -88,9 +89,12 @@ while True:
         
         for command in command.split("|"):#creates children for piping
             rc = os.fork()
-            forkExec(rc,True,r,w, left)
+            forkExec(rc,True,r,w, left,False)
             left = False
         continue
-    
+    background = False
+    if "&" in command:  #Checks whether the command should be run in the background
+        command = command.split("&")[0] 
+        background = True
     rc = os.fork()
-    forkExec(rc,False, 0,1,False)
+    forkExec(rc,False, 0,1,False,background)

@@ -6,5 +6,5 @@ with the file they want to output it to into the other end
 By using the "< " the system will assume it is receiving 
 input from the what is entered next. The shell is able to
 change directories. A pipeline with 2 commands has been 
-implemented. The exit command is used to take you out 
-of the shell.
+implemented. To run commands in the background use &
+ The exit command is used to take you out of the shell.
