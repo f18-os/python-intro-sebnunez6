@@ -30,14 +30,19 @@ str = input.read()
 #holds file
 list = str.split()
 
-
 for word in list:
 	#gets rid of any symbols associated with the word and makes the word all lowercase
-	resultingword = word.lower().replace(".","").replace("\"","").replace("'","").replace(",","").replace(";","").replace(":","")
-	if wordTracker.has_key(resultingword):
-		wordTracker[resultingword]+=1
-	else:
-		wordTracker.setdefault(resultingword,1)
+	resultingword = word.lower().replace(".","").replace("\"","").replace(",","").replace(";","").replace(":","")
+	
+	#checks for compound words joined by - or '
+	compoundword = resultingword.split("-")
+	if not len(compoundword) > 1:
+		compoundword = resultingword.split("'")
+	for resultingword in compoundword:
+		if resultingword in wordTracker:
+			wordTracker[resultingword]+=1
+		else:
+			wordTracker.setdefault(resultingword,1)
 
 
 sortedTracker = sorted(wordTracker)
@@ -45,5 +50,6 @@ sortedTracker = sorted(wordTracker)
 #writes to file
 output = open(outputFile,"w")
 for word in sortedTracker:
- 	output.write(word + " %s\n"%wordTracker[word])
+	if word.isalpha():
+ 		output.write(word + " %s\n"%wordTracker[word])
 output.close()
