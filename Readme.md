@@ -28,3 +28,12 @@ Note that there are two major dialects of Python.  Python 3.0 is
 incompatible with 2.7.   As a result, Python 2.7 remains popular.  All
 of our examples are in 2.7.  We (mildly) encourage students to use 2.7
 for their assignments. 
+
+###Student Portion
+wordCount.py utilizes a dictionary to keep track of each word in the input file.
+If the word is already present in the dictionary the value containing the repetitions
+is updated. Otherwise the word is added to the dictionary and it's value is set to one
+for the first appearance. One the file has been completely added the dictionary is
+sorted into a list. It is then used to output into the output file provided. The
+sorted list is used to access the values of the dictionary in alphabetical order.
+File path and system argv manipulation was received from Dr. Freudenthal's code
