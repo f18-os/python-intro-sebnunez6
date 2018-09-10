@@ -23,11 +23,11 @@ elif rc == 0:                   # child
         fd = sys.stdout.fileno() 
         os.set_inheritable(fd, True)
         args = redirectionTester[0].split()
-    elif len (inputdirection) > 1:
+    elif len (inputdirection) > 1: #turn file text into system arguements 
         input = open(inputdirection[1].strip(), "r") 
         str = input.read()
         args = inputdirection[0].split() + str.split()
-    else:
+    else:                                           #no redirection
         args = command.split()
     for dir in re.split(":", os.environ['PATH']):  # try each directory in path
         program = "%s/%s" % (dir, args[0])
