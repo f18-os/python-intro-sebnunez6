@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-
+#Part of code received from Dr. Freudenthal
 import os, sys, time, re
 
 pid = os.getpid()               # get and remember pid
@@ -16,12 +16,17 @@ elif rc == 0:                   # child
     os.write(1, ("Please enter input\n".encode()))
     command = input()
     redirectionTester = command.split(">")
+    inputdirection = command.split("<")
     if len(redirectionTester)  > 1:
         os.close(1)                
         sys.stdout = open(redirectionTester[1].strip(), "w")  # redirect child's stdout
         fd = sys.stdout.fileno() 
         os.set_inheritable(fd, True)
         args = redirectionTester[0].split()
+    elif len (inputdirection) > 1:
+        input = open(inputdirection[1].strip(), "r") 
+        str = input.read()
+        args = inputdirection[0].split() + str.split()
     else:
         args = command.split()
     for dir in re.split(":", os.environ['PATH']):  # try each directory in path
