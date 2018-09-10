@@ -14,13 +14,16 @@ if rc < 0:
 
 elif rc == 0:                   # child
     os.write(1, ("Please enter input\n".encode()))
-    args = input().split()
-
-    os.close(1)                
-    sys.stdout = open("outputShell.txt", "w")  # redirect child's stdout
-    fd = sys.stdout.fileno() 
-    os.set_inheritable(fd, True)
-
+    command = input()
+    redirectionTester = command.split(">")
+    if len(redirectionTester)  > 1:
+        os.close(1)                
+        sys.stdout = open(redirectionTester[1].strip(), "w")  # redirect child's stdout
+        fd = sys.stdout.fileno() 
+        os.set_inheritable(fd, True)
+        args = redirectionTester[0].split()
+    else:
+        args = command.split()
     for dir in re.split(":", os.environ['PATH']):  # try each directory in path
         program = "%s/%s" % (dir, args[0])
         try:
