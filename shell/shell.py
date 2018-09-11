@@ -1,17 +1,14 @@
 #! /usr/bin/env python3
 #Part of code received from Dr. Freudenthal
-import os, sys, time, re
+import os, sys, time, re, signal
 
 pid = os.getpid()               # get and remember pid
 
 os.write(1, ("About to fork (pid=%d)\n" % pid).encode())
-fileinput = open("run.txt", "w") 
-fileinput.write("Run")
-fileinput.close()
+# fileinput = open("run.txt", "w") 
+# fileinput.write(pid)
+# fileinput.close()
 while True:
-    fileinput = open("run.txt","r")
-    if "kill" in fileinput.read():
-        break
     rc = os.fork()
     if rc < 0:
         os.write(2, ("fork failed, returning %d\n" % rc).encode())
@@ -21,9 +18,8 @@ while True:
         os.write(1, (">".encode()))
         command = input()
         if "kill" in command:
-            output = open("run.txt", "w")
-            output.write("kill")
-            output.close
+            #output = open("run.txt", "r")
+            os.kill(os.getppid(), signal.SIGKILL)
             sys.exit(0)
         redirectionTester = command.split(">")
         inputdirection = command.split("<")
