@@ -4,10 +4,8 @@ import os, sys, time, re, signal
 
 pid = os.getpid()               # get and remember pid
 
-os.write(1, ("About to fork (pid=%d)\n" % pid).encode())
-# fileinput = open("run.txt", "w") 
-# fileinput.write(pid)
-# fileinput.close()
+#os.write(1, ("About to fork (pid=%d)\n" % pid).encode())
+
 while True:
     rc = os.fork()
     if rc < 0:
@@ -17,21 +15,22 @@ while True:
     elif rc == 0:                   # child
         os.write(1, (">".encode()))
         command = input()
-        if "kill" in command:
-            #output = open("run.txt", "r")
+
+        if "kill" in command: #Terminates shelll
             os.kill(os.getppid(), signal.SIGKILL)
             sys.exit(0)
-        redirectionTester = command.split(">")
+
+        redirectionTester = command.split(">") #checks for output redirection
         inputdirection = command.split("<")
-        
-        if len(redirectionTester)  > 1:
+
+        if len(redirectionTester)  > 1:# redirect child's stdout
+            inputdirection = redirectionTester[0].split("<")
             os.close(1)                
-            sys.stdout = open(redirectionTester[1].strip(), "w")  # redirect child's stdout
+            sys.stdout = open(redirectionTester[1].strip(), "w")  
             fd = sys.stdout.fileno() 
             os.set_inheritable(fd, True)
-            inputdirection = redirectionTester[0].split("<")
-       
-        elif len (inputdirection) > 1: #turn file text into system arguements 
+
+        if len (inputdirection) > 1: #turn file text into system arguements 
             input = open(inputdirection[1].strip(), "r") 
             str = input.read()
             args = inputdirection[0].split() + str.split()
