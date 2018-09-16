@@ -5,21 +5,37 @@ import os, sys, time, re, signal
 pid = os.getpid()               # get and remember pid
 
 #os.write(1, ("About to fork (pid=%d)\n" % pid).encode())
-
+currdir = os.getcwd()
 while True:
-    rc = os.fork()
+    folder = currdir[currdir.rfind("/",0,len(currdir)) + 1:]
+    os.write(1, ("@"  + folder + "$ ").encode()) #prints $ to terminal
+    command = input()
+
+    if "exit" in command: #Terminates shelll
+        sys.exit(0)
+
+    if "cd" in command:
+    
+        if ".." in command:                 #gets rid of last directory in path
+            currdir = currdir[:currdir.rfind("/",0,len(currdir))]
+    
+        else:                                           #adds new directory to path
+            currdir = currdir + "/" + command.split("cd")[1].strip()
+    
+        try:                                                #Tries changing to next directory
+            os.chdir(currdir)
+        except FileNotFoundError:                 
+            pass                                 
+        continue
+    
+    else:
+        rc = os.fork()
+    
     if rc < 0:
         os.write(2, ("fork failed, returning %d\n" % rc).encode())
         sys.exit(1)
 
     elif rc == 0:                   # child
-        os.write(1, (">".encode()))
-        command = input()
-
-        if "kill" in command: #Terminates shelll
-            os.kill(os.getppid(), signal.SIGKILL)
-            sys.exit(0)
-
         redirectionTester = command.split(">") #checks for output redirection
         inputdirection = command.split("<")
 
@@ -31,12 +47,17 @@ while True:
             os.set_inheritable(fd, True)
 
         if len (inputdirection) > 1: #turn file text into system arguements 
-            input = open(inputdirection[1].strip(), "r") 
-            str = input.read()
-            args = inputdirection[0].split() + str.split()
+            args = inputdirection[0].split()
+            os.close(0)                
+            sys.stdout = open(inputdirection[1].strip(), "r")  
+            fd = sys.stdout.fileno() 
+            os.set_inheritable(fd, True)
        
         else:                                           #no redirection
             args = inputdirection[0].split()
+        if len(args) < 1:
+            sys.exit(1)
+
         for dir in re.split(":", os.environ['PATH']):  # try each directory in path
             program = "%s/%s" % (dir, args[0])
             try:
@@ -49,4 +70,4 @@ while True:
 
     else:                           # parent fork 
         childPidCode = os.wait()
-        os.write(1, ("Command executed\n".encode()))
+        #os.write(1, ("Command executed\n".encode()))
