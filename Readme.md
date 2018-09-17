@@ -37,3 +37,7 @@ for the first appearance. One the file has been completely added the dictionary 
 sorted into a list. It is then used to output into the output file provided. The
 sorted list is used to access the values of the dictionary in alphabetical order.
 File path and system argv manipulation was received from Dr. Freudenthal's code
+
+Inside the shell folder is a executable python script for a shell. The shell utilizes python3
+Code was partially received from Dr. Freudenthal 's os demos and the concept of using dup2 was discussed 
+with the IA Edward Seymour. 
