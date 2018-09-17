@@ -17,10 +17,10 @@ while True:
     if "cd" in command:
     
         if ".." in command:                 #gets rid of last directory in path
-            currdir = currdir[:currdir.rfind("/",0,len(currdir))]
+            currdir = ".."
 
         else:                                           #adds new directory to path
-            currdir = currdir + "/" + command.split("cd")[1].strip()
+            currdir = command.split("cd")[1].strip()
     
         try:                                                #Tries changing to next directory
             os.chdir(currdir)
