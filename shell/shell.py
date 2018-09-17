@@ -12,18 +12,21 @@ def changeDirect(currdir):#method to change directories
     except FileNotFoundError:                 
         pass         
 
-#
-#def pipeHelper(r,w, left):
 
-
-def forkExec(rc, piping, r, w):   #method to execute fork
+def forkExec(rc, piping, r, w,left):   #method to execute fork
     if rc < 0:
         os.write(2, ("fork failed, returning %d\n" % rc).encode())
         sys.exit(1)
 
     elif rc == 0:                   # child
-        if(piping):
-            os.dup2(1,w,True)
+
+        if piping and left: #checking for piping and if input for piping
+            os.close(r)
+            os.dup2(w, sys.stdout.fileno(),True)
+        elif piping and not left: #checks if output for piping
+            os.close(w)
+            os.dup2(r, sys.stdin.fileno(),True)
+
         redirectionTester = command.split(">") #checks for output redirection
         inputdirection = command.split("<")
 
@@ -48,8 +51,10 @@ def forkExec(rc, piping, r, w):   #method to execute fork
 
         for dir in re.split(":", os.environ['PATH']):  # try each directory in path
             program = "%s/%s" % (dir, args[0])
+
             try:
                 os.execve(program, args, os.environ)  # try to exec program
+
             except FileNotFoundError:                 # ...expected
                 pass                                  # ...fail quietly 
 
@@ -61,11 +66,11 @@ def forkExec(rc, piping, r, w):   #method to execute fork
             os.dup2(1,w,True)
         childPidCode = os.wait()
 
-
     pid = os.getpid()               # get and remember pid
     currdir = os.getcwd()
+
 while True:
-    currdir = os.getcwd()
+    currdir = os.getcwd() #gets current directory
     folder = currdir[currdir.rfind("/",0,len(currdir)) + 1:]
     os.write(1, ("@"  + folder + "$ ").encode()) #prints @current folder$ to terminal
     command = input()
@@ -73,16 +78,19 @@ while True:
     if "exit" in command: #Terminates shelll
         sys.exit(0)
 
-    if "cd" in command:
+    if "cd" in command:#changes current directory
         changeDirect(command)     
         continue
-    if "|" in command:
-        for command in command.split("|"):
+
+    if "|" in command:#checks for piping
+        r,w = os.pipe()
+        left = True
+        
+        for command in command.split("|"):#creates children for piping
             rc = os.fork()
-            r,w = os.pipe()
-            forkExec(rc,True,r,w)
+            forkExec(rc,True,r,w, left)
+            left = False
         continue
     
     rc = os.fork()
-    forkExec(rc,False, 0,1)
-    
+    forkExec(rc,False, 0,1,False)
