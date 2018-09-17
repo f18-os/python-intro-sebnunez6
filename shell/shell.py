@@ -2,35 +2,17 @@
 #Part of code received from Dr. Freudenthal
 import os, sys, time, re, signal
 
-pid = os.getpid()               # get and remember pid
+def changeDirect(currdir):
+    if ".." in command:                 #gets rid of last directory in path
+        currdir = ".."
+    else:                                           #adds new directory to path
+        currdir = command.split("cd")[1].strip()
+    try:                                                #Tries changing to next directory
+        os.chdir(currdir)
+    except FileNotFoundError:                 
+        pass         
 
-#os.write(1, ("About to fork (pid=%d)\n" % pid).encode())
-currdir = os.getcwd()
-while True:
-    folder = currdir[currdir.rfind("/",0,len(currdir)) + 1:]
-    os.write(1, ("@"  + folder + "$ ").encode()) #prints $ to terminal
-    command = input()
-
-    if "exit" in command: #Terminates shelll
-        sys.exit(0)
-
-    if "cd" in command:
-    
-        if ".." in command:                 #gets rid of last directory in path
-            currdir = ".."
-
-        else:                                           #adds new directory to path
-            currdir = command.split("cd")[1].strip()
-    
-        try:                                                #Tries changing to next directory
-            os.chdir(currdir)
-        except FileNotFoundError:                 
-            pass                                 
-        continue
-    
-    else:
-        rc = os.fork()
-    
+def forkExec(rc):
     if rc < 0:
         os.write(2, ("fork failed, returning %d\n" % rc).encode())
         sys.exit(1)
@@ -71,3 +53,25 @@ while True:
     else:                           # parent fork 
         childPidCode = os.wait()
         #os.write(1, ("Command executed\n".encode()))
+
+
+    pid = os.getpid()               # get and remember pid
+
+    #os.write(1, ("About to fork (pid=%d)\n" % pid).encode())
+    currdir = os.getcwd()
+while True:
+    currdir = os.getcwd()
+    folder = currdir[currdir.rfind("/",0,len(currdir)) + 1:]
+    os.write(1, ("@"  + folder + "$ ").encode()) #prints $ to terminal
+    command = input()
+
+    if "exit" in command: #Terminates shelll
+        sys.exit(0)
+
+    if "cd" in command:
+        changeDirect(command)     
+        continue
+    
+    rc = os.fork()
+    forkExec(rc)
+    
