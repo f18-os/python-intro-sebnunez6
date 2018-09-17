@@ -2,22 +2,28 @@
 #Part of code received from Dr. Freudenthal
 import os, sys, time, re, signal
 
-def changeDirect(currdir):
-    if ".." in command:                 #gets rid of last directory in path
+def changeDirect(currdir):#method to change directories
+    if ".." in command:                
         currdir = ".."
-    else:                                           #adds new directory to path
+    else:                                         
         currdir = command.split("cd")[1].strip()
     try:                                                #Tries changing to next directory
         os.chdir(currdir)
     except FileNotFoundError:                 
         pass         
 
-def forkExec(rc):
+#
+#def pipeHelper(r,w, left):
+
+
+def forkExec(rc, piping, r, w):   #method to execute fork
     if rc < 0:
         os.write(2, ("fork failed, returning %d\n" % rc).encode())
         sys.exit(1)
 
     elif rc == 0:                   # child
+        if(piping):
+            os.dup2(1,w,True)
         redirectionTester = command.split(">") #checks for output redirection
         inputdirection = command.split("<")
 
@@ -51,18 +57,17 @@ def forkExec(rc):
         sys.exit(1)                 # terminate with error
 
     else:                           # parent fork 
+        if(piping):
+            os.dup2(1,w,True)
         childPidCode = os.wait()
-        #os.write(1, ("Command executed\n".encode()))
 
 
     pid = os.getpid()               # get and remember pid
-
-    #os.write(1, ("About to fork (pid=%d)\n" % pid).encode())
     currdir = os.getcwd()
 while True:
     currdir = os.getcwd()
     folder = currdir[currdir.rfind("/",0,len(currdir)) + 1:]
-    os.write(1, ("@"  + folder + "$ ").encode()) #prints $ to terminal
+    os.write(1, ("@"  + folder + "$ ").encode()) #prints @current folder$ to terminal
     command = input()
 
     if "exit" in command: #Terminates shelll
@@ -71,7 +76,13 @@ while True:
     if "cd" in command:
         changeDirect(command)     
         continue
+    if "|" in command:
+        for command in command.split("|"):
+            rc = os.fork()
+            r,w = os.pipe()
+            forkExec(rc,True,r,w)
+        continue
     
     rc = os.fork()
-    forkExec(rc)
+    forkExec(rc,False, 0,1)
     
