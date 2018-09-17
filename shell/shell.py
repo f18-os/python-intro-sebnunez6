@@ -18,7 +18,7 @@ while True:
     
         if ".." in command:                 #gets rid of last directory in path
             currdir = currdir[:currdir.rfind("/",0,len(currdir))]
-    
+
         else:                                           #adds new directory to path
             currdir = currdir + "/" + command.split("cd")[1].strip()
     
@@ -49,8 +49,8 @@ while True:
         if len (inputdirection) > 1: #turn file text into system arguements 
             args = inputdirection[0].split()
             os.close(0)                
-            sys.stdout = open(inputdirection[1].strip(), "r")  
-            fd = sys.stdout.fileno() 
+            sys.stdin = open(inputdirection[1].strip(), "r")  
+            fd = sys.stdin.fileno() 
             os.set_inheritable(fd, True)
        
         else:                                           #no redirection
