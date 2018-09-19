@@ -71,11 +71,10 @@ def forkExec(rc, piping, r, w,left, background):   #method to execute fork
         if(not background):#determines whether to run in background or not
             childPidCode = os.wait()
 
-    pid = os.getpid()               # get and remember pid
-    currdir = os.getcwd()
+
 
 while True:
-    if'PS1' in os.environ:
+    if 'PS1' in os.environ:
         os.write(1,(os.environ['PS1']).encode())
     else:
         currdir = os.getcwd() #gets current directory
