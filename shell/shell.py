@@ -49,8 +49,12 @@ def forkExec(rc, piping, r, w,left, background):   #method to execute fork
         if len(args) < 1:
             sys.exit(0)
 
+            
         for dir in re.split(":", os.environ['PATH']):  # try each directory in path
-            program = "%s/%s" % (dir, args[0])
+            if "/" in args[0]:                                                  #checks if command is file path
+                program = args[0]
+            else:
+                program = "%s/%s" % (dir, args[0])
 
             try:
                 os.execve(program, args, os.environ)  # try to exec program
@@ -71,11 +75,18 @@ def forkExec(rc, piping, r, w,left, background):   #method to execute fork
     currdir = os.getcwd()
 
 while True:
-    currdir = os.getcwd() #gets current directory
-    folder = currdir[currdir.rfind("/",0,len(currdir)) + 1:]
-    os.write(1, ("@"  + folder + "$ ").encode()) #prints @current folder$ to terminal
-    command = input()
-
+    if'PS1' in os.environ:
+        os.write(1,(os.environ['PS1']).encode())
+    else:
+        currdir = os.getcwd() #gets current directory
+        folder = currdir[currdir.rfind("/",0,len(currdir)) + 1:]
+        os.write(1, ("@"  + folder + "$ ").encode()) #prints @current folder$ to terminal
+    sys.stdout.flush()
+    command = ""
+    try:
+        command = input()
+    except EOFError:
+        sys.exit(0)
     if "exit" in command: #Terminates shelll
         sys.exit(0)
 
